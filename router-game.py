@@ -40,9 +40,19 @@ class Node:
             loc=THROUGHPUT_META_MEAN, scale=THROUGHPUT_META_STD)
 
         self.incoming_packets_meta_mean = self.throughput + np.random.normal(
-            loc=PACKETS_STD_MEAN,
-            scale=THROUGHPUT_META_STD
+            loc=0, # should be zero mean since 
+            scale=PACKETS_STD_MEAN
         )
+        """
+        either 
+        self.incoming_packets_meta_mean = np.random.normal(
+            loc=self.throughput,
+            scale=THROUGHPUT_META_STD)
+        or 
+        self.incoming_packets_meta_mean = self.throghput + np.random.normal(
+            loc=0,
+            scale=PACKETS_STD_MEAN)
+        """
 
         self.cost_history = []
         self.dropped_packets_history = []
