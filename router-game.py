@@ -184,9 +184,9 @@ class Game:
         ax2.set_ylabel("cost")
         ax2.set_xlabel("iterations")
 
-        #plt.show()
+        plt.show()
         fig1.savefig(f'dropped_packets_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
-        fig1.savefig(f'cost_history_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
+        fig2.savefig(f'cost_history_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
 
 
 if __name__ == "__main__":
