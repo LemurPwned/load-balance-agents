@@ -177,16 +177,16 @@ class Game:
         for agent in self.agents:
             ax1.plot(agent.dropped_packets_history)
             ax2.plot(agent.cost_history)
-        ax1.set_title("dropped_packets_history")
-        ax2.set_title("cost history")
+        ax1.set_title(f'dropped packets: {len(self.agents)} agents, {self.coalition_num} coalitions')
+        ax2.set_title(f'cost history: {len(self.agents)} agents, {self.coalition_num} coalitions')
         ax1.set_ylabel("dropped_packets")
         ax1.set_xlabel("iterations")
         ax2.set_ylabel("cost")
         ax2.set_xlabel("iterations")
 
         plt.show()
-        fig1.savefig(f'dropped_packets_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
-        fig2.savefig(f'cost_history_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
+        fig1.savefig(f'images/dropped_packets_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
+        fig2.savefig(f'images/cost_history_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
 
 
 if __name__ == "__main__":
