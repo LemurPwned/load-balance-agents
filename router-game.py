@@ -179,12 +179,12 @@ class Game:
             ax2.plot(agent.cost_history)
         ax1.set_title("dropped_packets_history")
         ax2.set_title("cost history")
-        ax1.set_xlabel("dropped_packets")
-        ax2.set_ylabel("cost")
+        ax1.set_ylabel("dropped_packets")
         ax1.set_xlabel("iterations")
-        ax2.set_ylabel("iterations")
+        ax2.set_ylabel("cost")
+        ax2.set_xlabel("iterations")
 
-        plt.show()
+        #plt.show()
         fig1.savefig(f'dropped_packets_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
         fig1.savefig(f'cost_history_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
 
