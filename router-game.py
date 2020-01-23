@@ -139,13 +139,15 @@ class Node:
             if self not in coalition.members:
                 # if not a member -- value not included
                 packet_pool += self.current_packets
-            return packet_pool/len(coalition.members)
-
+            try:
+                return packet_pool / len(coalition.members)
+            except ZeroDivisionError:
+                return 0
 
 class Game:
-    def __init__(self, agents_num=5):
+    def __init__(self, agents_num=5, coalition_num=3):
         self.agents = [Node(i) for i in range(agents_num)]
-        self.coalition_num = 3
+        self.coalition_num = coalition_num
         self.coalitions = [Coalition(i) for i in range(self.coalition_num)]
 
     def play(self, no_steps):
@@ -176,20 +178,29 @@ class Game:
 
         fig1, ax1 = plt.subplots()
         fig2, ax2 = plt.subplots()
+        #fig1.figsize(100,100)
         for agent in self.agents:
-            ax1.plot(agent.dropped_packets_history,
-                     '.--', label=f'Agent {agent.id}')
-            ax2.plot(agent.cost_history,
-                     '.--', label=f'Agent {agent.id}')
-        ax1.set_title("dropped_packets_history")
-        ax2.set_title("cost history")
-        ax1.legend()
-        ax2.legend()
+            ax1.plot(agent.dropped_packets_history)
+            ax2.plot(agent.cost_history)
+        ax1.set_title(f'dropped packets: {len(self.agents)} agents, {self.coalition_num} coalitions')
+        ax2.set_title(f'cost history: {len(self.agents)} agents, {self.coalition_num} coalitions')
+        ax1.set_ylabel("dropped_packets")
+        ax1.set_xlabel("iterations")
+        ax2.set_ylabel("cost")
+        ax2.set_xlabel("iterations")
+
         plt.show()
-        fig1.savefig(f'dropped_packets_{len(self.agents)}_agents.png')
-        fig1.savefig(f'cost_history_{len(self.agents)}_agents.png')
+        fig1.savefig(f'images/dropped_packets_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
+        fig2.savefig(f'images/cost_history_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
 
 
 if __name__ == "__main__":
-    g = Game()
-    g.play(15)
+    steps = [15, 50, 150]
+    agents = [15, 30, 60]
+    coalitions = [3, 5, 7]
+    for step in steps:
+        for coalition in coalitions:
+            for agent in agents:
+                g = Game(agent, coalition)
+                g.play(step)
+
