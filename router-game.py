@@ -62,6 +62,7 @@ class Node:
 
         self.current_packets = 0
         self.current_coalition = None
+        self.current_coalition_ptr = None
         self.saved_best_coal = None
 
     def make_move(self, coalitions):
@@ -70,6 +71,7 @@ class Node:
                 coalitions[self.saved_best_coal].join_coalition(self)
                 coalitions[self.current_coalition].remove_member(self)
                 self.current_coalition = self.saved_best_coal
+                self.current_coalition_ptr = coalitions[self.current_coalition]
 
     def sample_incoming_packets(self):
         self.current_packets = np.random.normal(loc=self.incoming_packets_meta_mean,
@@ -88,10 +90,13 @@ class Node:
     def calculate_cost_function(self, current_packets):
         dropped = 0
         processed = current_packets
+        penalty = 0
+        if self.current_coalition_ptr is not None:
+                penalty += BETA * len(self.current_coalition_ptr.members - 1)  
         if self.throughput < current_packets:
             dropped = current_packets - self.throughput
             processed = self.throughput
-        return (processed - ALPHA*dropped)/self.throughput - BETA * (self.current_coalition.members - 1), dropped, processed
+        return (processed - ALPHA*dropped)/self.throughput - penalty, dropped, processed
 
     def estimate_coalition_values(self, coalitions):
         max_coalition_val, coalition_num = 0, 0
