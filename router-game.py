@@ -181,8 +181,8 @@ class Game:
         ax1.legend()
         ax2.legend()
         plt.show()
-        fig1.savefig('dropped_packets_5_agents.png')
-        fig1.savefig('cost_history_5_agents.png')
+        fig1.savefig(f'dropped_packets_{len(self.agents)}_agents.png')
+        fig1.savefig(f'cost_history_{len(self.agents)}_agents.png')
 
 
 if __name__ == "__main__":
