@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import osbrain
 
 THROUGHPUT_META_MEAN = 100
 THROUGHPUT_META_STD = 10
@@ -144,6 +145,7 @@ class Game:
         self.agents = [Node(i) for i in range(agents_num)]
         self.coalition_num = coalition_num
         self.coalitions = [Coalition(i) for i in range(self.coalition_num)]
+        self.server = osbrain.run_nameserver()
 
     def play(self, no_steps):
 
