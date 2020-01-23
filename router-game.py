@@ -7,7 +7,7 @@ THROUGHPUT_META_STD = 10
 PACKETS_STD_MEAN = THROUGHPUT_META_STD
 
 ALPHA = 2
-
+BETA = 0.1
 
 class Coalition():
     def __init__(self, id):
@@ -91,7 +91,7 @@ class Node:
         if self.throughput < current_packets:
             dropped = current_packets - self.throughput
             processed = self.throughput
-        return (processed - ALPHA*dropped)/self.throughput, dropped, processed
+        return (processed - ALPHA*dropped)/self.throughput - BETA * (self.current_coalition.members - 1), dropped, processed
 
     def estimate_coalition_values(self, coalitions):
         max_coalition_val, coalition_num = 0, 0
