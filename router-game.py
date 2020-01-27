@@ -14,8 +14,18 @@ class Coalition():
         self.members = []
         self.current_throughput_pool = 0
         self.packets_history = []
+        self.membersCountHistory = []
         self.id = id
-        self.agentsCount = dict()
+        self.agents_count = dict()
+        
+    def packets_in_previous_turn(self):
+        return sum([member.packets_in_previous_turn for member in self.members])
+
+    def _calculate_throughput(self):
+        throughput = 0
+        for n in self.members:
+            throughput += n.throughput
+        return throughput
 
     def recalculate(self):
         self.current_throughput_pool = 0
@@ -31,10 +41,10 @@ class Coalition():
             pass# raise ValueError(f"Agent {member.id} already in coalition")
         else:
             self.members.append(member)
-            if member.id in self.agentsCount:
-                self.agentsCount[member.id] += 1
+            if member.id in self.agents_count.keys():
+                self.agents_count[member.id] += 1
             else:
-                self.agentsCount[member.id] = 1
+                self.agents_count[member.id] = 1
         self.recalculate()
 
 
@@ -48,6 +58,8 @@ class Node:
             loc=0, # should be zero mean since 
             scale=PACKETS_STD_MEAN
         )
+        self.packets_in_previous_turn = 0
+        self.expected_incoming_packets = 0
         """
         either 
         self.incoming_packets_meta_mean = np.random.normal(
@@ -86,6 +98,8 @@ class Node:
     def sample_incoming_packets(self):
         self.current_packets = np.random.normal(loc=self.incoming_packets_meta_mean,
                                                 scale=THROUGHPUT_META_STD)
+        self.expected_incoming_packets = (self.packets_in_previous_turn + self.current_packets)/2
+        self.packets_in_previous_turn = self.current_packets
         return self.current_packets
 
     def calculate_cost_function_at_step(self, step):
@@ -134,28 +148,13 @@ class Node:
         print(f"Decision: {decision}")
         return coalition_num
 
-    def est_coalition_packets(self, coalition, fairshare=False):
-        if fairshare:
-            packet_pool, total_throughput = 0, 0
-            for member in coalition.members:
-                total_throughput += member.throughput
-                packet_pool += member.current_packets
-            if self not in coalition.members:
-                # if not a member -- value not included
-                packet_pool += self.current_packets
-                total_throughput += self.throughput
-            return (self.throughput*packet_pool)/total_throughput
-        else:
-            packet_pool = 0
-            for member in coalition.members:
-                packet_pool += member.current_packets
-            if self not in coalition.members:
-                # if not a member -- value not included
-                packet_pool += self.current_packets
-            try:
-                return packet_pool / len(coalition.members)
-            except ZeroDivisionError:
-                return 0
+    def est_coalition_packets(self, coalition):
+        total_throughput = coalition._calculate_throughput() + self.throughput
+        
+        coal_contr =  self.expected_incoming_packets + coalition.packets_in_previous_turn()
+        predicted_load = (coal_contr) / (len(coalition.members)+1)
+        return (predicted_load - max(0, predicted_load - self.throughput))/self.throughput - BETA * len(
+            coalition.members)
 
 class Game:
     def __init__(self, agents_num=5, coalition_num=3, relations=[]):
@@ -170,15 +169,25 @@ class Game:
         for relation in self.relations:
             self.agents[relation[0]].register_coalition(self.coalitions[relation[1]]);
 
+        index = 0
         # randomly assigns routers to coalitions
         for agent in self.agents:
             coal_num = np.random.randint(0, len(agent.neighbour_coalitions))
             agent.neighbour_coalitions[coal_num].members.append(agent)
             agent.current_coalition = coal_num
+            if coal_num in self.coalitions:
+                self.coalitions[coal_num].agents_count[agent.id] += 1
+            else:
+                self.coalitions[coal_num].agents_count[agent.id] = 1
+
             agent.current_coalition_ptr = agent.neighbour_coalitions[coal_num]
+            index +=1
 
         for i in range(no_steps):
             print(f"\n############ STEP {i} ############\n")
+
+            for coalition in self.coalitions:
+                coalition.membersCountHistory.append(len(coalition.members))
 
             # sample the packets
             for agent in self.agents:
@@ -197,6 +206,8 @@ class Game:
         fig1, ax1 = plt.subplots()
         fig2, ax2 = plt.subplots()
         fig3, ax3 = plt.subplots()
+        fig4, ax4 = plt.subplots()
+
         #fig1.figsize(100,100)
         for agent in self.agents:
             ax1.plot(agent.dropped_packets_history)
@@ -204,8 +215,9 @@ class Game:
         coalitionsCount = dict()
 
         for coalition in self.coalitions:
-            values = list(coalition.agentsCount.values())
+            values = list(coalition.agents_count.values())
             coalitionsCount[int(coalition.id + 1)] = int(len(values))
+            ax4.plot(coalition.membersCountHistory)
 
         width = 0.35
         vals = list(coalitionsCount.values())
@@ -218,20 +230,26 @@ class Game:
         ax3.bar(ks, vals, width, color=colors)
 
         ax1.set_title(f'dropped packets: {len(self.agents)} agents, {self.coalition_num} coalitions')
-        ax2.set_title(f'cost history: {len(self.agents)} agents, {self.coalition_num} coalitions')
-        ax3.set_title(f'Total number of agents in coalition during game: {len(self.agents)} agents, {self.coalition_num} coalitions')
-        ax3.set_ylim([min(vals), max(vals)+3])
-
         ax1.set_ylabel("dropped_packets")
         ax1.set_xlabel("iterations")
 
-
+        ax2.set_title(f'cost history: {len(self.agents)} agents, {self.coalition_num} coalitions')
         ax2.set_ylabel("cost")
         ax2.set_xlabel("iterations")
 
+        ax3.set_title(f'Total number of agents in coalition during game: {len(self.agents)} agents, {self.coalition_num} coalitions')
+        ax3.set_ylim([min(vals), max(vals)+3])
         ax3.set_ylabel("number of agents")
         ax3.set_xlabel("coalitions")
         ax3.set_xticklabels([])
+
+        for agent in self.agents:
+            ax1.plot(agent.dropped_packets_history)
+            ax2.plot(agent.cost_history)
+
+        ax4.set_title(f'number of agents in coalition per iteration')
+        ax4.set_ylabel("number of agents in coalition")
+        ax4.set_xlabel("iterations")
 
         rects = ax3.patches
         for rect, label in zip(rects, ks):
@@ -245,13 +263,13 @@ class Game:
 
 
 if __name__ == "__main__":
-    steps = [50]
     agents = [15]
     coalitions = [3]
+    steps = [30]
     relations = [[[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1],[0,2],[1,2],[6,2],[7,2],[8,2],[9,2],[3,2],[4,2]]]  
     for step in steps:
         for coalition in coalitions:
             for agent in agents:
-                g = Game(agent, coalition,relations[0])
+                g = Game(agent, coalition, relations[0])
                 g.play(step)
 
