@@ -66,8 +66,9 @@ class Game:
         for coalition in self.coalitions:
             values = list(coalition.agents_count.values())
             coalitionsCount[int(coalition.id + 1)] = int(len(values))
-            ax4.plot(coalition.membersCountHistory)
+            ax4.plot(coalition.membersCountHistory, label=f'CoalitionId: {coalition.id}')
 
+        ax4.legend()
         width = 0.35
         vals = list(coalitionsCount.values())
         ks = list(coalitionsCount.keys())
@@ -76,7 +77,7 @@ class Game:
         for i in range(len(vals)):
             colors.append(my_colors[i])
 
-        ax3.bar(ks, vals, width, color=colors)
+        ax3.bar(ks, vals, width, color=colors, label=[i for i in range(len(ks))])
 
         ax1.set_title(f'dropped packets: {len(self.agents)} agents, {self.coalition_num} coalitions')
         ax1.set_ylabel("dropped_packets")
@@ -87,7 +88,7 @@ class Game:
         ax2.set_xlabel("iterations")
 
         ax3.set_title(f'Total number of agents in coalition during game: {len(self.agents)} agents, {self.coalition_num} coalitions')
-        ax3.set_ylim([min(vals), max(vals)+3])
+        ax3.set_ylim([0, max(vals)+3])
         ax3.set_ylabel("number of agents")
         ax3.set_xlabel("coalitions")
         ax3.set_xticklabels([])
