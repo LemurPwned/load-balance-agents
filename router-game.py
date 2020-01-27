@@ -7,7 +7,10 @@ THROUGHPUT_META_STD = 10
 PACKETS_STD_MEAN = THROUGHPUT_META_STD
 
 ALPHA = 2
-BETA = 0.1
+BETA = 0.001
+
+def cost_fun(load, throughput):
+    return (min(load, throughput) - max(0, load - throughput))/throughput
 
 
 def relation_generator(num_of_agents, num_of_coalitions, length):
@@ -114,10 +117,17 @@ class Node:
         self.neighbour_coalitions.append(coalition)
 
     def make_move(self):
-        if self.current_coalition and len(self.neighbour_coalitions)>0:
+        if self.saved_best_coal is None:
+            if(self.current_coalition is not None): 
+                self.neighbour_coalitions[self.current_coalition].remove_member(self)
+            self.current_coalition=None
+            self.current_coalition_ptr=None
+            return
+        if len(self.neighbour_coalitions)>0:
             if self.saved_best_coal != self.current_coalition:
                 self.neighbour_coalitions[self.saved_best_coal].join_coalition(self)
-                self.neighbour_coalitions[self.current_coalition].remove_member(self)
+                if(self.current_coalition is not None): 
+                    self.neighbour_coalitions[self.current_coalition].remove_member(self)
                 self.current_coalition = self.saved_best_coal
                 self.current_coalition_ptr = self.neighbour_coalitions[self.current_coalition]
 
@@ -146,20 +156,20 @@ class Node:
         if self.throughput < current_packets:
             dropped = current_packets - self.throughput
             processed = self.throughput
-        return (processed - ALPHA*dropped)/self.throughput - penalty, dropped, processed
+        return (processed - ALPHA * dropped)/self.throughput - penalty, dropped, processed
 
 
     def estimate_coalition_values(self):
         coalitions = self.neighbour_coalitions
         dropped_val, processed_val = 0.0, 0.0
-        max_coalition_val, coalition_num = 0, 0
+        dropped, processed = 0,0
+        max_coalition_val, coalition_num = cost_fun(self.expected_incoming_packets, self.throughput)/2.0 , None
         for i, coalition in enumerate(coalitions):
-            coalition_packets = self.est_coalition_packets(coalition)
-            coalition_val, dropped, processed = self.calculate_cost_function(
-                coalition_packets)
+            coalition_val = self.est_coalition_packets(coalition)
+            #coalition_val, dropped, processed = self.calculate_cost_function(coalition_packets)
             print(
                 f"\tAgent {self.id} estimated {coalition_val} for coalition {coalition.id}")
-            if coalition_val > max_coalition_val:
+            if coalition_val >= max_coalition_val:
                 coalition_num = i
                 max_coalition_val = coalition_val
                 dropped_val, processed_val = dropped, processed
@@ -175,11 +185,9 @@ class Node:
         return coalition_num
 
     def est_coalition_packets(self, coalition):
-        total_throughput = coalition._calculate_throughput() + self.throughput
-        
         coal_contr =  self.expected_incoming_packets + coalition.packets_in_previous_turn()
         predicted_load = (coal_contr) / (len(coalition.members)+1)
-        return (predicted_load - max(0, predicted_load - self.throughput))/self.throughput - BETA * len(
+        return (min(predicted_load, self.throughput) - max(0, predicted_load - self.throughput))/self.throughput - BETA * len(
             coalition.members)
 
 class Game:
@@ -214,6 +222,8 @@ class Game:
 
         for i in range(no_steps):
             print(f"\n############ STEP {i} ############\n")
+
+            print([agent.current_coalition_ptr.id for agent in self.agents if agent.current_coalition_ptr is not None])
 
             for coalition in self.coalitions:
                 coalition.membersCountHistory.append(len(coalition.members))
