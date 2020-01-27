@@ -15,6 +15,7 @@ class Coalition():
         self.current_throughput_pool = 0
         self.packets_history = []
         self.id = id
+        self.agentsCount = dict()
 
     def recalculate(self):
         self.current_throughput_pool = 0
@@ -27,9 +28,13 @@ class Coalition():
 
     def join_coalition(self, member):
         if member in self.members:
-            raise ValueError(f"Agent {member.id} already in coalition")
+            pass# raise ValueError(f"Agent {member.id} already in coalition")
         else:
             self.members.append(member)
+            if member.id in self.agentsCount:
+                self.agentsCount[member.id] += 1
+            else:
+                self.agentsCount[member.id] = 1
         self.recalculate()
 
 
@@ -71,7 +76,7 @@ class Node:
         self.neighbour_coalitions.append(coalition)
 
     def make_move(self):
-        if self.current_coalition:
+        if self.current_coalition and len(self.neighbour_coalitions)>0:
             if self.saved_best_coal != self.current_coalition:
                 self.neighbour_coalitions[self.saved_best_coal].join_coalition(self)
                 self.neighbour_coalitions[self.current_coalition].remove_member(self)
@@ -97,22 +102,24 @@ class Node:
         processed = current_packets
         penalty = 0
         if self.current_coalition_ptr is not None:
-                penalty += BETA * len(self.current_coalition_ptr.members) - 1  
+                penalty += BETA * len(self.current_coalition_ptr.members) - 1
         if self.throughput < current_packets:
             dropped = current_packets - self.throughput
             processed = self.throughput
         return (processed - ALPHA*dropped)/self.throughput - penalty, dropped, processed
 
-    def estimate_coalition_values(self, coalitions):
+    def estimate_coalition_values(self):
+        coalitions = self.neighbour_coalitions
+        dropped_val, processed_val = 0.0, 0.0
         max_coalition_val, coalition_num = 0, 0
-        for coalition in coalitions:
+        for i, coalition in enumerate(coalitions):
             coalition_packets = self.est_coalition_packets(coalition)
             coalition_val, dropped, processed = self.calculate_cost_function(
                 coalition_packets)
             print(
                 f"\tAgent {self.id} estimated {coalition_val} for coalition {coalition.id}")
             if coalition_val > max_coalition_val:
-                coalition_num = coalition.id
+                coalition_num = i
                 max_coalition_val = coalition_val
                 dropped_val, processed_val = dropped, processed
         print(
@@ -165,9 +172,9 @@ class Game:
         # randomly assigns routers to coalitions
         for agent in self.agents:
             coal_num = np.random.randint(0, len(agent.neighbour_coalitions))
-            self.coalitions[coal_num].members.append(agent)
+            agent.neighbour_coalitions[coal_num].members.append(agent)
             agent.current_coalition = coal_num
-            agent.current_coalition_ptr = self.coalitions[coal_num]
+            agent.current_coalition_ptr = agent.neighbour_coalitions[coal_num]
 
         for i in range(no_steps):
             print(f"\n############ STEP {i} ############\n")
@@ -178,8 +185,7 @@ class Game:
 
             # select best coalition
             for agent in self.agents:
-                agent.saved_best_coal = agent.estimate_coalition_values(
-                    self.coalitions)
+                agent.saved_best_coal = agent.estimate_coalition_values()
 
             # change coalitions
             for agent in self.agents:
@@ -189,10 +195,13 @@ class Game:
 
         fig1, ax1 = plt.subplots()
         fig2, ax2 = plt.subplots()
+        # fig3, ax3 = plt.subplots()
         #fig1.figsize(100,100)
         for agent in self.agents:
             ax1.plot(agent.dropped_packets_history)
             ax2.plot(agent.cost_history)
+        # for coalition in self.coalitions:
+        #     ax3.plot(coalition.agentsCount)
         ax1.set_title(f'dropped packets: {len(self.agents)} agents, {self.coalition_num} coalitions')
         ax2.set_title(f'cost history: {len(self.agents)} agents, {self.coalition_num} coalitions')
         ax1.set_ylabel("dropped_packets")
