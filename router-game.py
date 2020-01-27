@@ -104,7 +104,7 @@ class Node:
         return (processed - ALPHA*dropped)/self.throughput - penalty, dropped, processed
 
     def estimate_coalition_values(self, coalitions):
-        dropped_value, processed_val = 0.0, 0.0
+        dropped_val, processed_val = 0.0, 0.0
         max_coalition_val, coalition_num = 0, 0
         for coalition in coalitions:
             coalition_packets = self.est_coalition_packets(coalition)
@@ -184,23 +184,52 @@ class Game:
 
         fig1, ax1 = plt.subplots()
         fig2, ax2 = plt.subplots()
-        # fig3, ax3 = plt.subplots()
+        fig3, ax3 = plt.subplots()
         #fig1.figsize(100,100)
         for agent in self.agents:
             ax1.plot(agent.dropped_packets_history)
             ax2.plot(agent.cost_history)
-        # for coalition in self.coalitions:
-        #     ax3.plot(coalition.agentsCount)
+        coalitionsCount = dict()
+
+        for coalition in self.coalitions:
+            values = list(coalition.agentsCount.values())
+            coalitionsCount[int(coalition.id + 1)] = int(len(values))
+
+        width = 0.35
+        vals = list(coalitionsCount.values())
+        ks = list(coalitionsCount.keys())
+        my_colors = 'rgbkymc'
+        colors = list()
+        for i in range(len(vals)):
+            colors.append(my_colors[i])
+
+        ax3.bar(ks, vals, width, color=colors)
+
         ax1.set_title(f'dropped packets: {len(self.agents)} agents, {self.coalition_num} coalitions')
         ax2.set_title(f'cost history: {len(self.agents)} agents, {self.coalition_num} coalitions')
+        ax3.set_title(f'Total number of agents in coalition during game: {len(self.agents)} agents, {self.coalition_num} coalitions')
+        ax3.set_ylim([min(vals), max(vals)+3])
+
         ax1.set_ylabel("dropped_packets")
         ax1.set_xlabel("iterations")
+
+
         ax2.set_ylabel("cost")
         ax2.set_xlabel("iterations")
 
+        ax3.set_ylabel("number of agents")
+        ax3.set_xlabel("coalitions")
+        ax3.set_xticklabels([])
+
+        rects = ax3.patches
+        for rect, label in zip(rects, ks):
+            height = rect.get_height()
+            ax3.text(rect.get_x() + rect.get_width() / 2, height+0.3, label,
+                    ha='center', va='bottom')
+
         plt.show()
-        fig1.savefig(f'images/dropped_packets_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
-        fig2.savefig(f'images/cost_history_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
+        #fig1.savefig(f'images/dropped_packets_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
+        #fig2.savefig(f'images/cost_history_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
 
 
 if __name__ == "__main__":
