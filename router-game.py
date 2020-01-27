@@ -15,6 +15,7 @@ class Coalition():
         self.current_throughput_pool = 0
         self.packets_history = []
         self.id = id
+        self.agentsCount = dict()
 
     def recalculate(self):
         self.current_throughput_pool = 0
@@ -30,6 +31,10 @@ class Coalition():
             raise ValueError(f"Agent {member.id} already in coalition")
         else:
             self.members.append(member)
+            if member.id in self.agentsCount:
+                self.agentsCount[member.id] += 1
+            else:
+                self.agentsCount[member.id] = 1
         self.recalculate()
 
 
@@ -92,13 +97,14 @@ class Node:
         processed = current_packets
         penalty = 0
         if self.current_coalition_ptr is not None:
-                penalty += BETA * len(self.current_coalition_ptr.members - 1)  
+                penalty += BETA * len(self.current_coalition_ptr.members) - 1
         if self.throughput < current_packets:
             dropped = current_packets - self.throughput
             processed = self.throughput
         return (processed - ALPHA*dropped)/self.throughput - penalty, dropped, processed
 
     def estimate_coalition_values(self, coalitions):
+        dropped_value, processed_val = 0.0, 0.0
         max_coalition_val, coalition_num = 0, 0
         for coalition in coalitions:
             coalition_packets = self.est_coalition_packets(coalition)
@@ -178,10 +184,13 @@ class Game:
 
         fig1, ax1 = plt.subplots()
         fig2, ax2 = plt.subplots()
+        # fig3, ax3 = plt.subplots()
         #fig1.figsize(100,100)
         for agent in self.agents:
             ax1.plot(agent.dropped_packets_history)
             ax2.plot(agent.cost_history)
+        # for coalition in self.coalitions:
+        #     ax3.plot(coalition.agentsCount)
         ax1.set_title(f'dropped packets: {len(self.agents)} agents, {self.coalition_num} coalitions')
         ax2.set_title(f'cost history: {len(self.agents)} agents, {self.coalition_num} coalitions')
         ax1.set_ylabel("dropped_packets")
