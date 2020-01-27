@@ -55,14 +55,14 @@ class Node:
         if self.saved_best_coal is None:
             if(self.current_coalition is not None): 
                 self.neighbour_coalitions[self.current_coalition].remove_member(self)
-            self.current_coalition=None
-            self.current_coalition_ptr=None
+            self.current_coalition = None
+            self.current_coalition_ptr = None
             return
         if len(self.neighbour_coalitions)>0:
             if self.saved_best_coal != self.current_coalition:
-                self.neighbour_coalitions[self.saved_best_coal].join_coalition(self)
                 if(self.current_coalition is not None): 
                     self.neighbour_coalitions[self.current_coalition].remove_member(self)
+                self.neighbour_coalitions[self.saved_best_coal].join_coalition(self)
                 self.current_coalition = self.saved_best_coal
                 self.current_coalition_ptr = self.neighbour_coalitions[self.current_coalition]
 

@@ -20,12 +20,12 @@ class Game:
         # randomly assigns routers to coalitions
         for agent in self.agents:
             coal_num = np.random.randint(0, len(agent.neighbour_coalitions))
-            agent.neighbour_coalitions[coal_num].members.append(agent)
+            agent.neighbour_coalitions[coal_num].join_coalition(agent)
             agent.current_coalition = coal_num
             if coal_num in self.coalitions:
-                self.coalitions[coal_num].agents_count[agent.id] += 1
+                self.coalitions[agent.neighbour_coalitions[coal_num].id].agents_count[agent.id] += 1
             else:
-                self.coalitions[coal_num].agents_count[agent.id] = 1
+                self.coalitions[agent.neighbour_coalitions[coal_num].id].agents_count[agent.id] = 1
 
             agent.current_coalition_ptr = agent.neighbour_coalitions[coal_num]
             index +=1

@@ -1,3 +1,4 @@
+import numpy as np
 from Game import Game
 
 def relation_generator(num_of_agents, num_of_coalitions, length):
