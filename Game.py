@@ -33,7 +33,7 @@ class Game:
 
         for i in range(no_steps):
             print(f"\n############ STEP {i} ############\n")
-            graph_writer.write_graph(self.agents, self.coalitions, self.relations)
+            graph_writer.write_graph(self.agents, self.coalitions, self.relations, i)
             
             print([agent.current_coalition_ptr.id for agent in self.agents if agent.current_coalition_ptr is not None])
 
