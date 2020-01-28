@@ -2,7 +2,7 @@ from Coalition import Coalition
 
 colors = {0:"#FF0000", 1:"#00FF00", 2: "#0000FF", -1: "#FFFFFF"}
 
-def write_graph(agents, coalitions, relations):
+def write_graph(agents, coalitions, relations, step):
     graph_id = 0
     for coalition in coalitions:
         coalition.graph_id = graph_id
@@ -30,5 +30,5 @@ def write_graph(agents, coalitions, relations):
     for relation in relations:
         graph_str+='{0}--{1};\n'.format(agents[relation[0]].graph_id, coalitions[relation[1]].graph_id)
     graph_str+="}"
-    with open("output{0}.dot".format(i),"w+") as f:
+    with open("output{0}.dot".format(step),"w+") as f:
         f.write(graph_str)
