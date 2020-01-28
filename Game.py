@@ -58,6 +58,7 @@ class Game:
         fig2, ax2 = plt.subplots()
         fig3, ax3 = plt.subplots()
         fig4, ax4 = plt.subplots()
+        fig5, ax5 = plt.subplots()
 
         #fig1.figsize(100,100)
         for agent in self.agents:
@@ -102,6 +103,19 @@ class Game:
         ax4.set_title(f'number of agents in coalition per iteration')
         ax4.set_ylabel("number of agents in coalition")
         ax4.set_xlabel("iterations")
+
+        cost_histories_sum = []
+        idies = []
+        for agent in self.agents:
+            cost_histories_sum.append(sum(agent.cost_history))
+            idies.append(int(agent.id))
+
+        ax5.bar(idies, cost_histories_sum, width, label=[i for i in range(len(idies))])
+
+        ax5.set_title(f'Function Value -> ')
+        ax5.set_ylabel("sum of values")
+        ax5.set_xlabel("agents")
+        ax5.set_ylim([min(cost_histories_sum)-0.5, max(cost_histories_sum)+0.5])
 
         rects = ax3.patches
         for rect, label in zip(rects, ks):

@@ -6,7 +6,7 @@ THROUGHPUT_META_STD = 10
 PACKETS_STD_MEAN = THROUGHPUT_META_STD
 
 ALPHA = 2
-BETA = 0.01
+BETA = 0.001
 
 def cost_fun(load, throughput):
     return (min(load, throughput) - max(0, load - throughput))/throughput

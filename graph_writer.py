@@ -1,6 +1,6 @@
 from Coalition import Coalition
 
-colors = {0:"#FF0000", 1:"#00FF00", 2: "#0000FF", -1: "#FFFFFF"}
+colors = {0:"#FF0000", 1:"#00FF00", 2: "#0000FF", -1: "#FFFFFF", 3:"#ffbb0e"}
 
 def write_graph(agents, coalitions, relations, step):
     graph_id = 0
