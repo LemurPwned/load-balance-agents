@@ -72,7 +72,7 @@ class Game:
             ax4.plot(coalition.membersCountHistory, label=f'CoalitionId: {coalition.id}')
 
         ax4.legend()
-        width = 0.35
+        width = 0.8
         vals = list(coalitionsCount.values())
         ks = list(coalitionsCount.keys())
         my_colors = 'rgbkymc'
@@ -108,13 +108,15 @@ class Game:
         idies = []
         for agent in self.agents:
             cost_histories_sum.append(sum(agent.cost_history))
-            idies.append(int(agent.id))
+            idies.append(f'{agent.id}')
 
-        ax5.bar(idies, cost_histories_sum, width, label=[i for i in range(len(idies))])
+        ax5.bar(idies, cost_histories_sum, width)
 
-        ax5.set_title(f'Function Value -> ')
-        ax5.set_ylabel("sum of values")
+        ax5.set_title(f'Ranking of efficiency function')
+        ax5.set_ylabel("sum of cost function")
         ax5.set_xlabel("agents")
+        pos = np.arange(len(idies))
+        #ax5.set_xticks(pos, idies)
         ax5.set_ylim([min(cost_histories_sum)-0.5, max(cost_histories_sum)+0.5])
 
         rects = ax3.patches
@@ -124,5 +126,6 @@ class Game:
                     ha='center', va='bottom')
 
         plt.show()
+        return sum(cost_histories_sum)
         #fig1.savefig(f'images/dropped_packets_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')
         #fig2.savefig(f'images/cost_history_{len(self.agents)}_agents_{self.coalition_num}_coalition_{no_steps}_steps.png')

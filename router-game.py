@@ -27,11 +27,15 @@ if __name__ == "__main__":
     agents = [20]
     coalitions = [4]
     steps = [15]
+    costs = []
+    retries = 1
     relations = [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[6,1],[7,1],[8,1],[9,1],[10,1],[11,1],[12,1],[13,1],[14,1],[0,2],[1,2],[6,2],[7,2],[8,2],[9,2],[3,2],[4,2]]
-    r = relation_generator(agents[0], coalitions[0], 50)
-    for step in steps:
-        for coalition in coalitions:
-            for agent in agents:
-                g = Game(agent, coalition, r)
-                g.play(step)
-    print(r)
+    r = relation_generator(agents[0], coalitions[0], 100)
+    for index in range(retries):
+        for step in steps:
+            for coalition in coalitions:
+                for agent in agents:
+                    g = Game(agent, coalition, r)
+                    cost = g.play(step)
+                    costs.append(cost)
+    print(sum(costs)/retries)

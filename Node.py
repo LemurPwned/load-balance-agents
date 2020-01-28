@@ -6,7 +6,7 @@ THROUGHPUT_META_STD = 10
 PACKETS_STD_MEAN = THROUGHPUT_META_STD
 
 ALPHA = 2
-BETA = 0.001
+BETA = 0.01
 
 def cost_fun(load, throughput):
     return (min(load, throughput) - max(0, load - throughput))/throughput
@@ -98,7 +98,7 @@ class Node:
         coalitions = self.neighbour_coalitions
         dropped_val, processed_val = 0.0, 0.0
         dropped, processed = 0,0
-        max_coalition_val, coalition_num = cost_fun(self.expected_incoming_packets, self.throughput)/2.0 , None
+        max_coalition_val, coalition_num = cost_fun(self.expected_incoming_packets, self.throughput)/3.0 , None
         for i, coalition in enumerate(coalitions):
             coalition_val = self.est_coalition_packets(coalition)
             #coalition_val, dropped, processed = self.calculate_cost_function(coalition_packets)
