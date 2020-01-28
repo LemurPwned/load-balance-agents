@@ -1,4 +1,5 @@
 import numpy as np
+import graph_writer
 import matplotlib.pyplot as plt
 from Node import Node
 from Coalition import Coalition
@@ -32,7 +33,8 @@ class Game:
 
         for i in range(no_steps):
             print(f"\n############ STEP {i} ############\n")
-
+            graph_writer.write_graph(self.agents, self.coalitions, self.relations)
+            
             print([agent.current_coalition_ptr.id for agent in self.agents if agent.current_coalition_ptr is not None])
 
             for coalition in self.coalitions:
