@@ -3,9 +3,11 @@ from Coalition import Coalition
 
 THROUGHPUT_META_MEAN = 100
 THROUGHPUT_META_STD = 10
+MAX_PERSISTENCE = 7
+MIN_PERSISTENCE = 1
 
 PACKETS_STD_MEAN = THROUGHPUT_META_STD
-MARIAN_CONSTANT = 1.0
+MARIAN_CONSTANT = 3.0
 ALPHA = 2
 BETA = 0.01
 
@@ -46,13 +48,25 @@ class Node:
         self.current_coalition = None
         self.current_coalition_ptr: Coalition = None
         self.saved_best_coal = None
-
+        """
+        Coalition persistence states how reluctant the node is to 
+        join coaltion in this turn 
+        """
+        self.coalition_persistence = np.random.randint(MIN_PERSISTENCE,
+                                                       MAX_PERSISTENCE)
+        self.coalition_persistence_counter = 0
         self.neighbour_coalitions = []
 
     def register_coalition(self, coalition):
         self.neighbour_coalitions.append(coalition)
 
     def make_move(self):
+        self.coalition_persistence_counter += 1
+        if self.coalition_persistence:
+            if self.coalition_persistence_counter < self.coalition_persistence:
+                self.saved_best_coal = None
+            else:
+                self.coalition_persistence_counter = 0
         if self.saved_best_coal is None:
             if (self.current_coalition is not None):
                 self.neighbour_coalitions[
