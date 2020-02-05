@@ -130,6 +130,7 @@ class Game:
                 width,
                 color=colors,
                 label=[i for i in range(len(ks))])
+        ax3.tick_params(axis='x', labelrotation=45)
 
         ax1.set_title(
             f'dropped packets: {len(self.agents)} agents, {self.coalition_num} coalitions'
@@ -149,7 +150,6 @@ class Game:
         ax3.set_ylim([0, max(vals) + 3])
         ax3.set_ylabel("number of agents")
         ax3.set_xlabel("coalitions")
-        ax3.set_xticklabels([])
 
         # for agent in self.agents:
         #     ax1.plot(agent.dropped_packets_history)
@@ -179,6 +179,7 @@ class Game:
         ax5.set_ylim(
             [min(cost_histories_sum) - 0.5,
              max(cost_histories_sum) + 0.5])
+        ax5.set_xticklabels([i for i in range(len(self.agents))], rotation=45)
 
         rects = ax3.patches
         for rect, label in zip(rects, ks):

@@ -132,9 +132,6 @@ class Node:
         if coalition_num != self.current_coalition:
             decision = 'change'
 
-        # self.cost_history.append(coalition_val)
-        # self.dropped_packets_history.append(dropped_val)
-        # self.processed_packets_history.append(processed_val)
         print(f"Decision: {decision}")
         return coalition_num
 
