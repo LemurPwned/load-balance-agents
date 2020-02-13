@@ -9,7 +9,7 @@ python3 router-game.py
 
 
 ## Configuration
-The system has the following constants set by default:
+The system has the following constants set by default (these can be found in the `Node.py` file):
 ```python
 THROUGHPUT_META_MEAN = 100 # the mean of the Gaussian from which the throu
 THROUGHPUT_META_STD = 10
