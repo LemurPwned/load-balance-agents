@@ -23,8 +23,8 @@ BETA = 0.01
 ```
 
 1. **THROUGHPUT_META_MEAN**  
-  Mean of the Gaussian from which we draw the Node's throughput
-2.THROUGHPUT_META_STD . 
+  Mean of the Gaussian from which we draw the Node's throughput 
+2.**THROUGHPUT_META_STD**   
   Mean of the Gaussian from which we draw the Node's throughput
 3. **MAX_PERSISTENCE and MIN_PERSISTENCE**   
   These two variables restrict the node's ability to change coalitions. Each node is assigned a persistence value from the range (MIN_PERSISTENCE, MAX_PERSISTENCE). This number determines the minimum number of turns the node has to stay in the coalition.
